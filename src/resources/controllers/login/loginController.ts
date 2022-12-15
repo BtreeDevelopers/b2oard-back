@@ -1,8 +1,7 @@
 import Controller from '@/utils/interfaces/controllerInterface';
-import { Router, Request, Response, response } from 'express';
+import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
 import { bauth } from '@/utils/bauth/bauth';
-import User from '@/utils/interfaces/userInterfaces';
 import generateToken from '@/utils/Auth/jwt.auth';
 
 class LoginController implements Controller {
@@ -17,7 +16,7 @@ class LoginController implements Controller {
         this.router.post(`${this.path}`, this.login);
     }
 
-    private async login(req: Request, res: Response): Promise<void> {
+    private async login(req: Request, res: Response): Promise<any> {
         try {
             const loginUser = z.object({
                 email: string().email(),
@@ -43,18 +42,17 @@ class LoginController implements Controller {
 
             if (user._id === userFromToken._id) {
                 const bauth_token = generateToken({ id: userFromToken._id });
-                res.status(200).json({
+                return res.status(200).json({
                     bauth_token,
                     user,
                 });
             } else {
-                res.status(401).json({
+                return res.status(401).json({
                     message: 'Unable to create bauth',
                 });
             }
         } catch (error) {
-            res.status(400).json({ error });
-            throw error;
+            return res.status(400).json({ message: 'Ocorreu um erro' });
         }
     }
 }
