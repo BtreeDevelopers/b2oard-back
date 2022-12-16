@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const bauth = axios.create({
-    baseURL: String(process.env.AUTH_URL_DEV),
+    baseURL: String(process.env.AUTH_URL),
 });
 
 bauth.defaults.headers.common = {
