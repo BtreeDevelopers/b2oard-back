@@ -63,9 +63,11 @@ class AceptanceController implements Controller {
                     guestId: user._id,
                     ownerId: board.owner,
                 });
-                console.log(board, user, board);
+
                 await session.commitTransaction();
-                return res.status(201).json({ data });
+                return res
+                    .status(201)
+                    .json({ message: 'You request was sended to the owner' });
             }
             throw new Error('Aceptance request already sended');
         } catch (error: any) {
@@ -102,6 +104,7 @@ class AceptanceController implements Controller {
             const data = await aceptanceModel.find({
                 ownerId: user._id,
             });
+
             return res.status(200).json({ data });
         } catch (error) {
             return res.status(401).json({ error: 'Something went wrong' });
@@ -142,17 +145,17 @@ class AceptanceController implements Controller {
                 guestId: guestId,
             });
 
+            let message = 'Guest denied access as follower';
+
             if (answer) {
                 board.followers.push(guest._id);
-                await session.commitTransaction();
-                return res
-                    .status(200)
-                    .json({ message: 'Guest acept as follower' });
+                board.save();
+                message = 'Guest acept as follower';
             }
+
             await session.commitTransaction();
-            return res
-                .status(200)
-                .json({ message: 'Guest denied access as follower' });
+
+            return res.status(200).json({ message });
         } catch (error) {
             session.abortTransaction();
             return res.status(401).json({ error: 'Something went wrong' });

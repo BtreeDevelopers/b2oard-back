@@ -188,7 +188,7 @@ class BoardController implements Controller {
                 throw new Error('Board not found');
             }
             if (!board.followers.includes(user._id)) {
-                return res.status(401).json({
+                return res.status(555).json({
                     board,
                     message:
                         'You are not allowed to go further, contact the owner of the board',
