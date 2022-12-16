@@ -1,5 +1,11 @@
 import axios from 'axios';
 
-export const bauth = axios.create({
-    baseURL: String(process.env.AUTH_URL)
-})
+const bauth = axios.create({
+    baseURL: String(process.env.AUTH_URL_DEV),
+});
+
+bauth.defaults.headers.common = {
+    secret: `${process.env.ALLOWED_APP}`,
+};
+
+export default bauth;

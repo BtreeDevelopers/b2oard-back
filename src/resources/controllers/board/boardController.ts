@@ -8,6 +8,7 @@ import auth from '@/middleware/auth.middleware';
 import userModel from '@/resources/models/userModel';
 import boardModel from '@/resources/models/boardModel';
 import raiaModel from '@/resources/models/raiaModel';
+import bauth from '@/utils/bauth/bauth';
 
 class BoardController implements Controller {
     public path = '/board';
@@ -189,8 +190,13 @@ class BoardController implements Controller {
                 })
                 .populate('cards');
 
-            res.status(200).json({ board, raia });
+            const users = await bauth.post('/user/list', {
+                listArray: board.followers,
+            });
+            const listOfUser = users.data;
+            res.status(200).json({ board, raia, users: listOfUser.user });
         } catch (error: any) {
+            console.log(error);
             if (error.message === 'User not found') {
                 return res.status(404).json({ message: 'User not found' });
             }
