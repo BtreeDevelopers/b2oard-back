@@ -85,7 +85,7 @@ class BoardController implements Controller {
                     .json({ message: 'Board already exists' });
             }
 
-            return res.status(401).json(error);
+            return res.status(401).json({ error: 'Something went wrong' });
         } finally {
             session.endSession();
         }
@@ -126,7 +126,7 @@ class BoardController implements Controller {
             if (error.message === 'User not found') {
                 return res.status(404).json({ message: 'User not found' });
             }
-            res.status(401).json(error);
+            return res.status(401).json({ error: 'Something went wrong' });
         }
     }
     private async deleteBoard(req: Request, res: Response): Promise<any> {
@@ -178,7 +178,10 @@ class BoardController implements Controller {
             if (!req.params.id) {
                 throw new Error('Param not found');
             }
-
+            const board = await boardModel.findById(req.params.id);
+            if (!board) {
+                throw new Error('Board not found');
+            }
             const raia = await raiaModel
                 .find({
                     board: req.params.id,
@@ -186,15 +189,18 @@ class BoardController implements Controller {
                 })
                 .populate('cards');
 
-            res.status(200).json({ raia });
+            res.status(200).json({ board, raia });
         } catch (error: any) {
-            if ('User not found') {
+            if (error.message === 'User not found') {
                 return res.status(404).json({ message: 'User not found' });
             }
-            if ('Param not found') {
+            if (error.message === 'Param not found') {
                 return res.status(404).json({ message: 'Param not found' });
             }
-            res.status(401).json(error);
+            if (error.message === 'Board not found') {
+                return res.status(404).json({ message: 'Board not found' });
+            }
+            return res.status(401).json({ error: 'Something went wrong' });
         }
     }
 }
