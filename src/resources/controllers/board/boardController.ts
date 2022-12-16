@@ -186,7 +186,6 @@ class BoardController implements Controller {
             const raia = await raiaModel
                 .find({
                     board: req.params.id,
-                    users: user._id,
                 })
                 .populate('cards');
 
