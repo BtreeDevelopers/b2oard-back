@@ -73,7 +73,7 @@ class BoardController implements Controller {
                 await session.commitTransaction();
                 return res.status(201).json({ data });
             } else {
-                return new Error('Board already exists');
+                throw new Error('Board already exists');
             }
         } catch (error: any) {
             await session.abortTransaction();
@@ -179,10 +179,22 @@ class BoardController implements Controller {
             if (!req.params.id) {
                 throw new Error('Param not found');
             }
-            const board = await boardModel.findById(req.params.id);
+
+            const board = await boardModel.findOne({
+                _id: req.params.id,
+            }); //                followers: user._id,
+
             if (!board) {
                 throw new Error('Board not found');
             }
+            if (!board.followers.includes(user._id)) {
+                return res.status(401).json({
+                    board,
+                    message:
+                        'You are not allowed to go further, contact the owner of the board',
+                });
+            }
+
             const raia = await raiaModel
                 .find({
                     board: req.params.id,
@@ -193,7 +205,9 @@ class BoardController implements Controller {
                 listArray: board.followers,
             });
             const listOfUser = users.data;
-            res.status(200).json({ board, raia, users: listOfUser.user });
+            return res
+                .status(200)
+                .json({ board, raia, users: listOfUser.user });
         } catch (error: any) {
             console.log(error);
             if (error.message === 'User not found') {
