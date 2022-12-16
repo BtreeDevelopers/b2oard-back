@@ -98,10 +98,12 @@ class RaiaController implements Controller {
                 throw new Error('Raia not found');
             }
 
-            const data = await raiaModel.updateOne({
-                _id: req.params.id,
-                title: title,
-            });
+            const data = await raiaModel.updateOne(
+                {
+                    _id: req.params.id,
+                },
+                { title: title }
+            );
 
             session.commitTransaction();
             return res
@@ -109,7 +111,7 @@ class RaiaController implements Controller {
                 .json({ message: 'Update done with success' });
         } catch (error: any) {
             await session.abortTransaction();
-
+            console.log(error);
             if (error.message === 'Param not found') {
                 return res.status(401).json({ message: 'Param not found' });
             }
