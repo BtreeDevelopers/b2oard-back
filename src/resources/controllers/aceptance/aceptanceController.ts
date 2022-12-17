@@ -118,7 +118,7 @@ class AceptanceController implements Controller {
             const boardWithCallsToAcept = await boardModel.find({
                 _id: { $in: idBoardsToAcept },
             });
-            console.log('depois');
+
             const listOfUsersWhoWantsToJoin: string[] = [];
 
             boardWithCallsToAcept.forEach((element) => {
@@ -184,7 +184,9 @@ class AceptanceController implements Controller {
             return res.status(200).json({ message });
         } catch (error) {
             await session.abortTransaction();
-            return res.status(401).json({ error: 'Something went wrong' });
+            return res
+                .status(401)
+                .json({ error: 'Something went wrong', code: error });
         } finally {
             await session.endSession();
         }
