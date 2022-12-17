@@ -116,7 +116,6 @@ class BoardController implements Controller {
                 });
 
                 const boards = await boardModel.find({
-                    owner: user._id,
                     _id: { $in: favoritos?.favorites },
                 });
                 return res.status(200).json({ boards, favs });
