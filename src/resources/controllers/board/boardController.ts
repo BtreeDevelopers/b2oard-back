@@ -99,7 +99,7 @@ class BoardController implements Controller {
             if (!user) {
                 throw new Error('User not found');
             }
-            const favs = await favoritesModel.find({ userId: user._id });
+            const favs = await favoritesModel.findOne({ userId: user._id });
             if (
                 !req.params.filter ||
                 req.params.filter === 'all' ||
