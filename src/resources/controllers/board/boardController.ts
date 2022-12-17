@@ -111,13 +111,13 @@ class BoardController implements Controller {
                 return res.status(200).json({ boards, favs });
             }
             if (req.params.filter === 'fav') {
-                const favoritos = await favoritesModel.find({
+                const favoritos = await favoritesModel.findOne({
                     userId: user._id,
                 });
 
                 const boards = await boardModel.find({
                     owner: user._id,
-                    _id: favoritos,
+                    _id: { $in: favoritos?.favorites },
                 });
                 return res.status(200).json({ boards, favs });
             }
