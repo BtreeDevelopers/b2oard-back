@@ -106,7 +106,7 @@ class BoardController implements Controller {
                 req.params.filter === ''
             ) {
                 const boards = await boardModel.find({
-                    $or: [{ owner: user._id }, { followers: user._id }],
+                    owner: user._id,
                 });
                 return res.status(200).json({ boards, favs });
             }
