@@ -2,6 +2,7 @@ import auth from '@/middleware/auth.middleware';
 import aceptanceModel from '@/resources/models/aceptanceModel';
 import boardModel from '@/resources/models/boardModel';
 import userModel from '@/resources/models/userModel';
+import { bauth } from '@/utils/bauth/bauth';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
 import mongoose from 'mongoose';
@@ -101,12 +102,37 @@ class AceptanceController implements Controller {
             if (!user) {
                 throw new Error('User not found');
             }
-            const data = await aceptanceModel.find({
+            const listOfAceptances = await aceptanceModel.find({
                 ownerId: user._id,
             });
 
-            return res.status(200).json({ data });
+            const idBoardsToAcept: string[] = [];
+            listOfAceptances.forEach((element) => {
+                idBoardsToAcept.push(element.boardId);
+            });
+            console.log(
+                'aqui ===============>',
+                idBoardsToAcept,
+                listOfAceptances
+            );
+            const boardWithCallsToAcept = await boardModel.find({
+                _id: { $in: idBoardsToAcept },
+            });
+            console.log('depois');
+            const listOfUsersWhoWantsToJoin: string[] = [];
+
+            boardWithCallsToAcept.forEach((element) => {
+                listOfUsersWhoWantsToJoin.push(...element.followers);
+            });
+
+            const users = await bauth.post('/user/list', {
+                listArray: listOfUsersWhoWantsToJoin,
+            });
+
+            const listOfUser = users.data;
+            return res.status(200).json({ listOfAceptances, listOfUser });
         } catch (error) {
+            console.log(error);
             return res.status(401).json({ error: 'Something went wrong' });
         }
     }
@@ -140,7 +166,7 @@ class AceptanceController implements Controller {
                 throw new Error('Board not found');
             }
 
-            aceptanceModel.deleteOne({
+            await aceptanceModel.deleteOne({
                 boardId: boardId,
                 guestId: guestId,
             });

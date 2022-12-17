@@ -9,6 +9,7 @@ import userModel from '@/resources/models/userModel';
 import boardModel from '@/resources/models/boardModel';
 import raiaModel from '@/resources/models/raiaModel';
 import { bauth } from '@/utils/bauth/bauth';
+import favoritesModel from '@/resources/models/favoritesModel';
 
 class BoardController implements Controller {
     public path = '/board';
@@ -109,9 +110,13 @@ class BoardController implements Controller {
                 return res.status(200).json({ boards });
             }
             if (req.params.filter === 'fav') {
+                const favoritos = await favoritesModel.find({
+                    userId: user._id,
+                });
+
                 const boards = await boardModel.find({
                     owner: user._id,
-                    favorito: true,
+                    _id: favoritos,
                 });
                 return res.status(200).json({ boards });
             }
@@ -145,10 +150,24 @@ class BoardController implements Controller {
                 throw new Error('Param not found');
             }
 
-            const raia = await raiaModel.findOne({ board: req.params.id });
+            await favoritesModel.updateMany(
+                {},
+                { $pull: { favorites: { $in: req.params.id } } }
+            );
+
+            const raias = await raiaModel.find({ board: req.params.id });
+            if (raias.length === 0) {
+                throw new Error('Raias from this board not found');
+            }
+            const raiasId = raias.filter((el) => el.cards.length > 0);
+
+            const idCards: string[] = [];
+            raiasId.forEach((element) => {
+                idCards.push(...element.cards);
+            });
 
             const cards = await cardModel.deleteMany({
-                board: { $in: raia?.cards },
+                _id: { $in: idCards },
             });
 
             const board = await boardModel.deleteOne({ _id: req.params.id });
