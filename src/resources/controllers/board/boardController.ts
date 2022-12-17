@@ -105,7 +105,7 @@ class BoardController implements Controller {
                 req.params.filter === ''
             ) {
                 const boards = await boardModel.find({
-                    owner: user._id,
+                    $or: [{ owner: user._id }, { followers: user._id }],
                 });
                 return res.status(200).json({ boards });
             }
@@ -122,7 +122,7 @@ class BoardController implements Controller {
             }
             if (req.params.filter === 'shared') {
                 const boards = await boardModel.find({
-                    $or: [{ owner: user._id }, { followers: user._id }],
+                    followers: user._id,
                 });
                 return res.status(200).json({ boards });
             }

@@ -126,13 +126,11 @@ class AceptanceController implements Controller {
                 listArray: listOfUsersWhoWantsToJoin,
             });
 
-            return res
-                .status(200)
-                .json({
-                    listOfAceptances,
-                    boardWithCallsToAcept,
-                    users: users.data.user,
-                });
+            return res.status(200).json({
+                listOfAceptances,
+                boardWithCallsToAcept,
+                users: users.data.user,
+            });
         } catch (error) {
             console.log(error);
             return res.status(401).json({ error: 'Something went wrong' });
