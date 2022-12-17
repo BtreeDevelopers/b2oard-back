@@ -129,8 +129,9 @@ class AceptanceController implements Controller {
                 listArray: listOfUsersWhoWantsToJoin,
             });
 
-            const listOfUser = users.data;
-            return res.status(200).json({ listOfAceptances, listOfUser });
+            return res
+                .status(200)
+                .json({ listOfAceptances, users: users.data.user });
         } catch (error) {
             console.log(error);
             return res.status(401).json({ error: 'Something went wrong' });
@@ -184,9 +185,7 @@ class AceptanceController implements Controller {
             return res.status(200).json({ message });
         } catch (error) {
             await session.abortTransaction();
-            return res
-                .status(401)
-                .json({ error: 'Something went wrong', code: error });
+            return res.status(401).json({ error: 'Something went wrong' });
         } finally {
             await session.endSession();
         }
