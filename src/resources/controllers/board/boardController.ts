@@ -99,6 +99,7 @@ class BoardController implements Controller {
             if (!user) {
                 throw new Error('User not found');
             }
+            const favs = await favoritesModel.find({ userId: user._id });
             if (
                 !req.params.filter ||
                 req.params.filter === 'all' ||
@@ -107,7 +108,7 @@ class BoardController implements Controller {
                 const boards = await boardModel.find({
                     $or: [{ owner: user._id }, { followers: user._id }],
                 });
-                return res.status(200).json({ boards });
+                return res.status(200).json({ boards, favs });
             }
             if (req.params.filter === 'fav') {
                 const favoritos = await favoritesModel.find({
@@ -118,16 +119,16 @@ class BoardController implements Controller {
                     owner: user._id,
                     _id: favoritos,
                 });
-                return res.status(200).json({ boards });
+                return res.status(200).json({ boards, favs });
             }
             if (req.params.filter === 'shared') {
                 const boards = await boardModel.find({
                     $and: [
                         { followers: user._id },
-                        { $not: { owner: user._id } },
+                        { owner: { $not: user._id } },
                     ],
                 });
-                return res.status(200).json({ boards });
+                return res.status(200).json({ boards, favs });
             }
             return res.status(400).json({
                 message: 'Unknown param; It can only be: all, shared or fav',
