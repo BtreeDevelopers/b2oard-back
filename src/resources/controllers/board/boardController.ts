@@ -124,7 +124,7 @@ class BoardController implements Controller {
                 const boards = await boardModel.find({
                     $and: [
                         { followers: user._id },
-                        { owner: { $not: user._id } },
+                        { owner: { $ne: user._id } },
                     ],
                 });
                 return res.status(200).json({ boards, favs });
@@ -133,6 +133,7 @@ class BoardController implements Controller {
                 message: 'Unknown param; It can only be: all, shared or fav',
             });
         } catch (error: any) {
+            console.log(error);
             if (error.message === 'User not found') {
                 return res.status(404).json({ message: 'User not found' });
             }
