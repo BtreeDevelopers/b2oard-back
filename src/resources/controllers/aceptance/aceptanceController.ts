@@ -107,22 +107,19 @@ class AceptanceController implements Controller {
             });
 
             const idBoardsToAcept: string[] = [];
+            const listOfUsersWhoWantsToJoin: string[] = [];
             listOfAceptances.forEach((element) => {
                 idBoardsToAcept.push(element.boardId);
+                listOfUsersWhoWantsToJoin.push(element.guestId);
             });
-            console.log(
-                'aqui ===============>',
-                idBoardsToAcept,
-                listOfAceptances
-            );
+
             const boardWithCallsToAcept = await boardModel.find({
                 _id: { $in: idBoardsToAcept },
             });
 
-            const listOfUsersWhoWantsToJoin: string[] = [];
-
+            const nameOfTheBoardsToAcept: string[] = [];
             boardWithCallsToAcept.forEach((element) => {
-                listOfUsersWhoWantsToJoin.push(...element.followers);
+                nameOfTheBoardsToAcept.push(...element.nome);
             });
 
             const users = await bauth.post('/user/list', {
@@ -131,7 +128,11 @@ class AceptanceController implements Controller {
 
             return res
                 .status(200)
-                .json({ listOfAceptances, users: users.data.user });
+                .json({
+                    listOfAceptances,
+                    boardWithCallsToAcept,
+                    users: users.data.user,
+                });
         } catch (error) {
             console.log(error);
             return res.status(401).json({ error: 'Something went wrong' });
