@@ -8,7 +8,7 @@ import auth from '@/middleware/auth.middleware';
 import userModel from '@/resources/models/userModel';
 import boardModel from '@/resources/models/boardModel';
 import raiaModel from '@/resources/models/raiaModel';
-import bauth from '@/utils/bauth/bauth';
+import { bauth } from '@/utils/bauth/bauth';
 
 class BoardController implements Controller {
     public path = '/board';
@@ -35,6 +35,8 @@ class BoardController implements Controller {
          *
          */
         this.router.delete(`${this.path}/:id`, auth, this.deleteBoard);
+
+        this.router.put(`${this.path}`, auth, this.updateBoard);
     }
 
     private async createNewBoard(req: Request, res: Response): Promise<any> {
@@ -51,10 +53,9 @@ class BoardController implements Controller {
                 nome: string(),
                 cor: string(),
                 icon: string(),
-                favorito: boolean(),
             });
 
-            const { nome, cor, icon, favorito } = newBoard.parse(req.body);
+            const { nome, cor, icon } = newBoard.parse(req.body);
 
             const board = await boardModel.findOne({
                 nome: nome,
@@ -66,7 +67,6 @@ class BoardController implements Controller {
                     nome: nome,
                     cor: cor,
                     icon: icon,
-                    favorito: favorito,
                     owner: user._id,
                     followers: [user._id],
                 });
@@ -88,9 +88,10 @@ class BoardController implements Controller {
 
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
+
     private async listMyBoard(req: Request, res: Response): Promise<any> {
         try {
             const user = await userModel.findOne({ _id: req.userId });
@@ -167,7 +168,7 @@ class BoardController implements Controller {
 
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
     private async getThisBoard(req: Request, res: Response): Promise<any> {
@@ -220,6 +221,59 @@ class BoardController implements Controller {
                 return res.status(404).json({ message: 'Board not found' });
             }
             return res.status(401).json({ error: 'Something went wrong' });
+        }
+    }
+
+    private async updateBoard(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const user = await userModel.findById(req.userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            const boardBody = z.object({
+                boardId: z.string(),
+                nome: z.string().optional(),
+                icon: z.string().optional(),
+                cor: z.string().optional(),
+            });
+            const { boardId, nome, icon, cor } = boardBody.parse(req.body);
+
+            const board = await boardModel.findById(boardId);
+
+            if (!board) {
+                throw new Error('Board not found');
+            }
+
+            if (board.owner !== user._id) {
+                return res.status(401).json({ message: 'Not Allowed' });
+            }
+
+            board.update({
+                nome: nome || board.nome,
+                icon: icon || board.icon,
+                cor: cor || board.cor,
+            });
+            board.save();
+
+            await session.commitTransaction();
+
+            res.status(201).json({ message: 'Updated with success' });
+        } catch (error: any) {
+            await session.abortTransaction();
+
+            if (error.message === 'User not found') {
+                return res.status(401).json({ message: 'User not found' });
+            }
+            if (error.message === 'Board not found') {
+                return res.status(401).json({ message: 'Board not found' });
+            }
+
+            return res.status(401).json({ error: 'Something went wrong' });
+        } finally {
+            await session.endSession();
         }
     }
 }

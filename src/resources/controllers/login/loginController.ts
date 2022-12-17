@@ -1,7 +1,7 @@
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
-import bauth from '@/utils/bauth/bauth';
+import { bauth } from '@/utils/bauth/bauth';
 import generateToken from '@/utils/Auth/jwt.auth';
 
 class LoginController implements Controller {

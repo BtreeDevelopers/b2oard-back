@@ -88,7 +88,7 @@ class AceptanceController implements Controller {
             }
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 
@@ -157,10 +157,10 @@ class AceptanceController implements Controller {
 
             return res.status(200).json({ message });
         } catch (error) {
-            session.abortTransaction();
+            await session.abortTransaction();
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 }

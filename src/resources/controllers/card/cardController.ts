@@ -59,7 +59,7 @@ class CardController implements Controller {
             raia.cards.push(data._id);
             raia.save();
 
-            session.commitTransaction();
+            await session.commitTransaction();
 
             return res.status(200).json({ data });
         } catch (error: any) {
@@ -78,7 +78,7 @@ class CardController implements Controller {
             }
             res.status(401).send(error);
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
     private async deleteCard(req: Request, res: Response): Promise<any> {
@@ -109,7 +109,7 @@ class CardController implements Controller {
             }
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 }

@@ -21,6 +21,7 @@ class RaiaController implements Controller {
         this.router.get(`${this.path}`, auth, this.readRaia);
         this.router.put(`${this.path}/:id`, auth, this.updateRaia);
         this.router.delete(`${this.path}/:id`, auth, this.deleteRaia);
+        this.router.put(`${this.path}`, auth, this.exchangeCards);
     }
 
     private async createNewRaia(req: Request, res: Response): Promise<any> {
@@ -51,7 +52,7 @@ class RaiaController implements Controller {
             await session.commitTransaction();
             return res.status(201).json({ data });
         } catch (error: any) {
-            session.abortTransaction();
+            await session.abortTransaction();
             if (error.message === 'User not found') {
                 return res.status(404).json({ message: 'User not found' });
             }
@@ -60,7 +61,7 @@ class RaiaController implements Controller {
             }
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
     //REMOVER
@@ -105,7 +106,7 @@ class RaiaController implements Controller {
                 { title: title }
             );
 
-            session.commitTransaction();
+            await session.commitTransaction();
             return res
                 .status(201)
                 .json({ message: 'Update done with success' });
@@ -120,7 +121,7 @@ class RaiaController implements Controller {
             }
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 
@@ -140,14 +141,14 @@ class RaiaController implements Controller {
 
             await cardModel.deleteMany({ _id: { $in: raia.cards } });
 
-            raiaModel.deleteOne({ _id: req.params.id });
+            await raiaModel.deleteOne({ _id: req.params.id });
 
-            session.commitTransaction();
+            await session.commitTransaction();
             return res.status(201).json({
                 message: 'Success on delete!',
             });
         } catch (error: any) {
-            session.abortTransaction();
+            await session.abortTransaction();
 
             if (error.message === 'Param not found') {
                 return res.status(401).json({ message: 'Param not found' });
@@ -158,7 +159,82 @@ class RaiaController implements Controller {
 
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            session.endSession();
+            await session.endSession();
+        }
+    }
+
+    private async exchangeCards(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const user = await userModel.findOne({ _id: req.userId });
+            if (!user) {
+                throw new Error('User not found');
+            }
+            const requestBody = z.object({
+                fromRaiaId: string(),
+                toRaiaId: string(),
+                cardId: string(),
+            });
+
+            const { fromRaiaId, toRaiaId, cardId } = requestBody.parse(
+                req.body
+            );
+
+            const raiaEnvia = await raiaModel.findById(fromRaiaId);
+            const raiaRecebe = await raiaModel.findById(toRaiaId);
+
+            if (!raiaEnvia || !raiaRecebe) {
+                throw new Error(
+                    'Unable to continue due one or both raias not found'
+                );
+            }
+
+            if (
+                !raiaEnvia.users.includes(user._id) ||
+                !raiaRecebe.users.includes(user._id) ||
+                !raiaEnvia.cards.includes(cardId)
+            ) {
+                throw new Error(
+                    'Unable to continue due user not allowed or card not found'
+                );
+            }
+            raiaRecebe.cards.push(cardId);
+            raiaRecebe.save();
+            raiaEnvia.cards.splice(raiaEnvia.cards.indexOf(cardId), 1);
+            raiaEnvia.save();
+
+            await session.commitTransaction();
+            return res
+                .status(201)
+                .json({ message: 'Tranference complete with success' });
+        } catch (error: any) {
+            await session.abortTransaction();
+            if (error.message === 'User not found') {
+                return res.status(401).json({ message: 'User not found' });
+            }
+            if (
+                error.message ===
+                'Unable to continue due one or both raias not found'
+            ) {
+                return res.status(401).json({
+                    message:
+                        'Unable to continue due one or both raias not found',
+                });
+            }
+            if (
+                error.message ===
+                'Unable to continue due user not allowed or card not found'
+            ) {
+                return res.status(401).json({
+                    message:
+                        'Unable to continue due user not allowed or card not found',
+                });
+            }
+
+            return res.status(401).json({ error: 'Something went wrong' });
+        } finally {
+            await session.endSession();
         }
     }
 }
