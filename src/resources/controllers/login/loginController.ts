@@ -41,10 +41,11 @@ class LoginController implements Controller {
             const userFromToken = responseTokenUser.data;
 
             if (user._id === userFromToken._id) {
-                const bauth_token = generateToken({ id: userFromToken._id });
+                const token_bjrd = generateToken({ id: userFromToken._id });
                 return res.status(200).json({
-                    bauth_token,
+                    token_bjrd,
                     user,
+                    bauth_token: token,
                 });
             } else {
                 return res.status(401).json({
