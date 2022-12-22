@@ -275,12 +275,14 @@ class BoardController implements Controller {
                 return res.status(401).json({ message: 'Not Allowed' });
             }
 
-            board.update({
-                nome: nome || board.nome,
-                icon: icon || board.icon,
-                cor: cor || board.cor,
-            });
-            board.save();
+            await boardModel.updateOne(
+                { _id: board._id },
+                {
+                    nome: nome || board.nome,
+                    icon: icon || board.icon,
+                    cor: cor || board.cor,
+                }
+            );
 
             await session.commitTransaction();
 
