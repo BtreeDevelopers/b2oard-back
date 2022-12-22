@@ -1,5 +1,4 @@
 import auth from '@/middleware/auth.middleware';
-import boardModel from '@/resources/models/boardModel';
 import cardModel from '@/resources/models/cardModel';
 import raiaModel from '@/resources/models/raiaModel';
 import userModel from '@/resources/models/userModel';
@@ -66,9 +65,6 @@ class CardController implements Controller {
             await session.abortTransaction();
             if (error.message === 'User not found') {
                 return res.status(401).json({ message: 'User not found' });
-            }
-            if (error.message === 'Board not found') {
-                res.status(400).json({ message: 'Board not found' });
             }
             if (error.message === 'Param not found') {
                 res.status(400).json({ message: 'Param not found' });

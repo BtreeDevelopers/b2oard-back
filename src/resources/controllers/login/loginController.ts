@@ -44,7 +44,9 @@ class LoginController implements Controller {
                 const token_bjrd = generateToken({ id: userFromToken._id });
                 return res.status(200).json({
                     token_bjrd,
-                    user,
+                    _id: user._id,
+                    nome: user.nome,
+                    email: user.email,
                     bauth_token: token,
                 });
             } else {

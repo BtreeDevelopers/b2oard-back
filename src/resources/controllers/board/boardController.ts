@@ -160,19 +160,18 @@ class BoardController implements Controller {
             );
 
             const raias = await raiaModel.find({ board: req.params.id });
-            if (raias.length === 0) {
-                throw new Error('Raias from this board not found');
+            if (raias.length > 0) {
+                const raiasId = raias.filter((el) => el.cards.length > 0);
+
+                const idCards: string[] = [];
+                raiasId.forEach((element) => {
+                    idCards.push(...element.cards);
+                });
+
+                const cards = await cardModel.deleteMany({
+                    _id: { $in: idCards },
+                });
             }
-            const raiasId = raias.filter((el) => el.cards.length > 0);
-
-            const idCards: string[] = [];
-            raiasId.forEach((element) => {
-                idCards.push(...element.cards);
-            });
-
-            const cards = await cardModel.deleteMany({
-                _id: { $in: idCards },
-            });
 
             const board = await boardModel.deleteOne({ _id: req.params.id });
 
@@ -180,6 +179,7 @@ class BoardController implements Controller {
 
             return res.status(200).json({ message: 'Success on delete!' });
         } catch (error: any) {
+            console.log(error);
             await session.abortTransaction();
 
             if (error.message === 'User not found') {
@@ -270,7 +270,8 @@ class BoardController implements Controller {
                 throw new Error('Board not found');
             }
 
-            if (board.owner !== user._id) {
+            if (board.owner.toString() !== user._id.toString()) {
+                console.log(board.owner, user._id);
                 return res.status(401).json({ message: 'Not Allowed' });
             }
 
