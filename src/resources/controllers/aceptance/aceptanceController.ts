@@ -131,8 +131,8 @@ class AceptanceController implements Controller {
                 boardWithCallsToAcept,
                 users: users.data.user,
             });
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            console.log(error.response);
             return res.status(401).json({ error: 'Something went wrong' });
         }
     }
