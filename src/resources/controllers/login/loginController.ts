@@ -48,13 +48,15 @@ class LoginController implements Controller {
                     nome: user.nome,
                     email: user.email,
                     bauth_token: token,
+                    imagemUrl: user.imagemUrl,
                 });
             } else {
                 return res.status(401).json({
                     message: 'Unable to create bauth',
                 });
             }
-        } catch (error) {
+        } catch (error: any) {
+            console.log(error);
             return res.status(400).json({ message: 'Ocorreu um erro' });
         }
     }
