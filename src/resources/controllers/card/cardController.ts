@@ -33,12 +33,12 @@ class CardController implements Controller {
                 subtitle: z.string().optional(),
                 dateEnd: z.string().optional(),
                 tags: z.array(z.string()).optional(),
+                users: z.array(z.string()).optional(),
                 raiaID: z.string(),
             });
 
-            const { title, subtitle, dateEnd, tags, raiaID } = cardBody.parse(
-                req.body
-            );
+            const { title, subtitle, dateEnd, tags, raiaID, users } =
+                cardBody.parse(req.body);
 
             const raia = await raiaModel.findOne({
                 _id: raiaID,
@@ -46,13 +46,18 @@ class CardController implements Controller {
             if (!raia) {
                 throw new Error('Raia not found');
             }
+            const idUsers: string[] = [];
 
+            idUsers.push(req.userId);
+            users?.forEach((element) => {
+                idUsers.push(element);
+            });
             const data = await cardModel.create({
                 title: title,
                 subtitle: subtitle,
                 dateEnd: dateEnd,
                 tags: tags,
-                users: [req.userId],
+                users: idUsers,
             });
 
             raia.cards.push(data._id);
