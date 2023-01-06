@@ -1,4 +1,5 @@
 import auth from '@/middleware/auth.middleware';
+import boardModel from '@/resources/models/boardModel';
 import cardModel from '@/resources/models/cardModel';
 import raiaModel from '@/resources/models/raiaModel';
 import userModel from '@/resources/models/userModel';
@@ -46,18 +47,26 @@ class CardController implements Controller {
             if (!raia) {
                 throw new Error('Raia not found');
             }
-            const idUsers: string[] = [];
+
+            const board = await boardModel.findOne({
+                _id: raia.board,
+                users: users,
+            });
+            if (!board) {
+                throw new Error('User cannot be add');
+            }
+            /*const idUsers: string[] = [];
 
             idUsers.push(req.userId);
             users?.forEach((element) => {
                 idUsers.push(element);
-            });
+            });*/
             const data = await cardModel.create({
                 title: title,
                 subtitle: subtitle,
                 dateEnd: dateEnd,
                 tags: tags,
-                users: idUsers,
+                users: users,
             });
 
             raia.cards.push(data._id);
@@ -76,6 +85,9 @@ class CardController implements Controller {
             }
             if (error.message === 'Raia not found') {
                 res.status(400).json({ message: 'Raia not found' });
+            }
+            if (error.message === 'User cannot be add') {
+                res.status(400).json({ message: 'User cannot be add' });
             }
             res.status(401).send(error);
         } finally {
