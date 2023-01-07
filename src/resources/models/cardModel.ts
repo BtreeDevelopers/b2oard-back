@@ -7,6 +7,7 @@ const CardSchema = new Schema({
     dateEnd: { type: String, require: true },
     tags: { type: [String], require: true },
     users: { type: [String], require: true },
+    priority: { type: Number, require: true },
 });
 
 export default model<Card>('Card', CardSchema);

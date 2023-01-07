@@ -37,9 +37,10 @@ class CardController implements Controller {
                 tags: z.array(z.string()).optional(),
                 users: z.array(z.string()).optional(),
                 raiaID: z.string(),
+                priority: z.number().optional(),
             });
 
-            const { title, subtitle, dateEnd, tags, raiaID, users } =
+            const { title, subtitle, dateEnd, tags, raiaID, users, priority } =
                 cardBody.parse(req.body);
 
             const raia = await raiaModel.findOne({
@@ -68,6 +69,7 @@ class CardController implements Controller {
                 dateEnd: dateEnd,
                 tags: tags,
                 users: users,
+                priority: priority,
             });
 
             raia.cards.push(data._id);
@@ -135,9 +137,19 @@ class CardController implements Controller {
                 subtitle: z.string().optional(),
                 dateEnd: z.string().optional(),
                 tags: z.array(z.string()).optional(),
+                priority: z.number().optional(),
+                users: z.array(z.string()).optional(),
             });
 
-            const { title, subtitle, dateEnd, tags } = cardBody.parse(req.body);
+            const { title, subtitle, dateEnd, tags, priority, users } =
+                cardBody.parse(req.body);
+
+            const board = await boardModel.findOne({
+                followers: { $in: users },
+            });
+            if (!board) {
+                throw new Error('User is not member of board');
+            }
 
             const user = await userModel.findOne({ _id: req.userId });
 
@@ -153,13 +165,15 @@ class CardController implements Controller {
             if (!card) {
                 throw new Error('Card cannot be updated');
             }
-            const data = await cardModel.updateOne(
+            await cardModel.updateOne(
                 { _id: req.params.cardId },
                 {
                     title: title || card.title,
                     subtitle: subtitle || card.subtitle,
                     dateEnd: dateEnd || card.dateEnd,
                     tags: tags || card.tags,
+                    priority: priority || card.priority,
+                    users: users || card.users,
                 }
             );
 

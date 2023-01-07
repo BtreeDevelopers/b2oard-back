@@ -6,6 +6,7 @@ interface Card extends Document {
     dateEnd: string;
     tags: Array<string>;
     users: Array<string>;
+    priority: Number;
 }
 
 export default Card;
