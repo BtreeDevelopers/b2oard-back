@@ -144,11 +144,14 @@ class CardController implements Controller {
             const { title, subtitle, dateEnd, tags, priority, users } =
                 cardBody.parse(req.body);
 
-            const board = await boardModel.findOne({
-                followers: { $in: users },
-            });
-            if (!board) {
-                throw new Error('User is not member of board');
+            if (users) {
+                const board = await boardModel.findOne({
+                    followers: { $in: users },
+                });
+                console.log(users);
+                if (!board) {
+                    throw new Error('User is not member of board');
+                }
             }
 
             const user = await userModel.findOne({ _id: req.userId });
@@ -183,6 +186,7 @@ class CardController implements Controller {
                 card: updated,
             });
         } catch (error: any) {
+            console.log(error);
             await session.abortTransaction();
             if (error.message === 'User not found') {
                 return res.status(401).json({ message: 'User not found' });
