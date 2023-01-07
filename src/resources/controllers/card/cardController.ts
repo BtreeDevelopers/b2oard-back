@@ -165,7 +165,7 @@ class CardController implements Controller {
             if (!card) {
                 throw new Error('Card cannot be updated');
             }
-            await cardModel.updateOne(
+            const updated = await cardModel.updateOne(
                 { _id: req.params.cardId },
                 {
                     title: title || card.title,
@@ -180,6 +180,7 @@ class CardController implements Controller {
             session.commitTransaction();
             res.status(201).send({
                 message: 'Updated with success',
+                card: updated,
             });
         } catch (error: any) {
             await session.abortTransaction();
