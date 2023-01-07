@@ -19,6 +19,7 @@ class CardController implements Controller {
     public async initialiseRoutes(): Promise<void> {
         this.router.post(`${this.path}`, auth, this.createNewCard);
         this.router.delete(`${this.path}/:cardId`, auth, this.deleteCard);
+        this.router.put(`${this.path}/:cardId`, auth, this.updateCard);
     }
 
     private async createNewCard(req: Request, res: Response): Promise<any> {
@@ -123,6 +124,63 @@ class CardController implements Controller {
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
             await session.endSession();
+        }
+    }
+    private async updateCard(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const cardBody = z.object({
+                title: z.string().optional(),
+                subtitle: z.string().optional(),
+                dateEnd: z.string().optional(),
+                tags: z.array(z.string()).optional(),
+            });
+
+            const { title, subtitle, dateEnd, tags } = cardBody.parse(req.body);
+
+            const user = await userModel.findOne({ _id: req.userId });
+
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            if (!req.params.cardId) {
+                throw new Error('Param not found');
+            }
+
+            const card = await cardModel.findById(req.params.cardId);
+            if (!card) {
+                throw new Error('Card cannot be updated');
+            }
+            const data = await cardModel.updateOne(
+                { _id: req.params.cardId },
+                {
+                    title: title || card.title,
+                    subtitle: subtitle || card.subtitle,
+                    dateEnd: dateEnd || card.dateEnd,
+                    tags: tags || card.tags,
+                }
+            );
+
+            session.commitTransaction();
+            res.send(201).send({ message: 'Updated with success', data });
+        } catch (error: any) {
+            await session.abortTransaction();
+            if (error.message === 'User not found') {
+                return res.status(401).json({ message: 'User not found' });
+            }
+            if (error.message === 'Param not found') {
+                return res.status(401).json({ message: 'Param not found' });
+            }
+            if (error.message === 'Card cannot be updated') {
+                return res
+                    .status(401)
+                    .json({ message: 'Card cannot be updated' });
+            }
+            return res.status(401).json({ error: 'Something went wrong' });
+        } finally {
+            await session.abortTransaction();
         }
     }
 }
