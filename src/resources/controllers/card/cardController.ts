@@ -139,19 +139,25 @@ class CardController implements Controller {
                 tags: z.array(z.string()).optional(),
                 priority: z.number().optional(),
                 users: z.array(z.string()).optional(),
+                fromRaiaId: z.string().optional(),
+                toRaiaId: z.string().optional(),
+                boardId: z.string().optional(),
             });
 
-            const { title, subtitle, dateEnd, tags, priority, users } =
-                cardBody.parse(req.body);
+            const {
+                title,
+                subtitle,
+                dateEnd,
+                tags,
+                priority,
+                users,
+                fromRaiaId,
+                toRaiaId,
+                boardId,
+            } = cardBody.parse(req.body);
 
-            if (users) {
-                const board = await boardModel.findOne({
-                    followers: { $in: users },
-                });
-                console.log(users);
-                if (!board) {
-                    throw new Error('User is not member of board');
-                }
+            if (!req.params.cardId) {
+                throw new Error('Param not found');
             }
 
             const user = await userModel.findOne({ _id: req.userId });
@@ -160,14 +166,46 @@ class CardController implements Controller {
                 throw new Error('User not found');
             }
 
-            if (!req.params.cardId) {
-                throw new Error('Param not found');
+            if (users) {
+                const board = await boardModel.findOne({
+                    _id: boardId,
+                    followers: { $in: users },
+                    tags: {
+                        $elemMatch: { id: { $all: tags } },
+                    },
+                });
+
+                if (!board) {
+                    throw new Error('User is not member of board');
+                }
             }
 
             const card = await cardModel.findById(req.params.cardId);
             if (!card) {
                 throw new Error('Card cannot be updated');
             }
+
+            if (fromRaiaId && toRaiaId) {
+                const raiaEnvia = await raiaModel.findById(fromRaiaId);
+                const raiaRecebe = await raiaModel.findById(toRaiaId);
+
+                if (!raiaEnvia || !raiaRecebe) {
+                    throw new Error(
+                        'Unable to continue due one or both raias not found'
+                    );
+                }
+
+                if (
+                    !raiaEnvia.users.includes(user._id) ||
+                    !raiaRecebe.users.includes(user._id) ||
+                    !raiaEnvia.cards.includes(req.params.cardId)
+                ) {
+                    throw new Error(
+                        'Unable to continue due user not allowed or card not found'
+                    );
+                }
+            }
+
             const updated = await cardModel.updateOne(
                 { _id: req.params.cardId },
                 {

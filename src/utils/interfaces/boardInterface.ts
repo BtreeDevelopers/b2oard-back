@@ -6,6 +6,7 @@ interface Board extends Document {
     icon: string;
     owner: string;
     followers: Array<string>;
+    tags: Array<{ id: string; text: string; color: string }>;
 }
 
 export default Board;

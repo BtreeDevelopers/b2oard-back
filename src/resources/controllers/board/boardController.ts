@@ -261,8 +261,19 @@ class BoardController implements Controller {
                 nome: z.string().optional(),
                 icon: z.string().optional(),
                 cor: z.string().optional(),
+                tags: z
+                    .array(
+                        z.object({
+                            id: z.string(),
+                            text: z.string(),
+                            color: z.string(),
+                        })
+                    )
+                    .optional(),
             });
-            const { boardId, nome, icon, cor } = boardBody.parse(req.body);
+            const { boardId, nome, icon, cor, tags } = boardBody.parse(
+                req.body
+            );
 
             const board = await boardModel.findById(boardId);
 
@@ -281,6 +292,7 @@ class BoardController implements Controller {
                     nome: nome || board.nome,
                     icon: icon || board.icon,
                     cor: cor || board.cor,
+                    tags: tags || board.tags,
                 }
             );
 
