@@ -164,7 +164,9 @@ class CardController implements Controller {
             );
 
             session.commitTransaction();
-            res.send(201).send({ message: 'Updated with success', data });
+            res.status(201).send({
+                message: 'Updated with success',
+            });
         } catch (error: any) {
             await session.abortTransaction();
             if (error.message === 'User not found') {
