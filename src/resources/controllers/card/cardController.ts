@@ -182,7 +182,7 @@ class CardController implements Controller {
             }
             return res.status(401).json({ error: 'Something went wrong' });
         } finally {
-            await session.abortTransaction();
+            await session.endSession();
         }
     }
 }
