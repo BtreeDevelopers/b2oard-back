@@ -167,15 +167,21 @@ class CardController implements Controller {
             }
 
             if (users) {
-                const board = await boardModel.findOne({
+                /*const boardppp = await boardModel.findOne({
                     _id: boardId,
                     followers: { $in: users },
                     tags: {
                         $elemMatch: { id: { $all: tags } },
                     },
-                });
+                });*/
+
+                const board = await boardModel.findById(boardId);
 
                 if (!board) {
+                    throw new Error('Board was not found');
+                }
+
+                if (!board.followers.some((r) => users.includes(r))) {
                     throw new Error('User is not member of board');
                 }
             }
