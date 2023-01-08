@@ -186,8 +186,10 @@ class CardController implements Controller {
                     throw new Error('User is not member of board');
                 }
 
-                if (!board.tags.some((r) => tags?.includes(r.id))) {
-                    throw new Error('Tags does not exit on this board');
+                if (tags && tags?.length > 0) {
+                    if (!board.tags.some((r) => tags?.includes(r.id))) {
+                        throw new Error('Tags does not exit on this board');
+                    }
                 }
             }
 
@@ -215,6 +217,13 @@ class CardController implements Controller {
                         'Unable to continue due user not allowed or card not found'
                     );
                 }
+                raiaRecebe.cards.push(req.params.cardId);
+                raiaRecebe.save();
+                raiaEnvia.cards.splice(
+                    raiaEnvia.cards.indexOf(req.params.cardId),
+                    1
+                );
+                raiaEnvia.save();
             }
 
             const updated = await cardModel.updateOne(
