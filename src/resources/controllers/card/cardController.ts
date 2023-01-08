@@ -180,9 +180,14 @@ class CardController implements Controller {
                 if (!board) {
                     throw new Error('Board was not found');
                 }
-
+                console.log(board.followers);
+                console.log(users);
                 if (!board.followers.some((r) => users.includes(r))) {
                     throw new Error('User is not member of board');
+                }
+
+                if (!board.tags.some((r) => tags?.includes(r.id))) {
+                    throw new Error('Tags does not exit on this board');
                 }
             }
 
