@@ -3,3 +3,5 @@ node_modules
 .env
 test
 mock.json
+service.js
+web.config

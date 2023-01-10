@@ -31,7 +31,7 @@ const app = new App(
         aceptanceController,
         favoritesController,
     ],
-    Number(process.env.PORT)
+   process.env.PORT as any
 );
 
 app.start();
