@@ -44,11 +44,11 @@ class BoardController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
 
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             const newBoard = z.object({
                 nome: string(),
@@ -60,7 +60,7 @@ class BoardController implements Controller {
 
             const board = await boardModel.findOne({
                 nome: nome,
-                owner: user._id,
+                owner: req.userId,
             });
 
             if (!board) {
@@ -68,8 +68,8 @@ class BoardController implements Controller {
                     nome: nome,
                     cor: cor,
                     icon: icon,
-                    owner: user._id,
-                    followers: [user._id],
+                    owner: req.userId,
+                    followers: [req.userId],
                 });
                 await session.commitTransaction();
                 return res.status(201).json({ data });
@@ -95,24 +95,24 @@ class BoardController implements Controller {
 
     private async listMyBoard(req: Request, res: Response): Promise<any> {
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
-            const favs = await favoritesModel.findOne({ userId: user._id });
+            }*/
+            const favs = await favoritesModel.findOne({ userId: req.userId });
             if (
                 !req.params.filter ||
                 req.params.filter === 'all' ||
                 req.params.filter === ''
             ) {
                 const boards = await boardModel.find({
-                    owner: user._id,
+                    owner: req.userId,
                 });
                 return res.status(200).json({ boards, favs });
             }
             if (req.params.filter === 'fav') {
                 const favoritos = await favoritesModel.findOne({
-                    userId: user._id,
+                    userId: req.userId,
                 });
 
                 const boards = await boardModel.find({
@@ -123,8 +123,8 @@ class BoardController implements Controller {
             if (req.params.filter === 'shared') {
                 const boards = await boardModel.find({
                     $and: [
-                        { followers: user._id },
-                        { owner: { $ne: user._id } },
+                        { followers: req.userId },
+                        { owner: { $ne: req.userId } },
                     ],
                 });
                 return res.status(200).json({ boards, favs });
@@ -144,11 +144,11 @@ class BoardController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /* const user = await userModel.findOne({ _id: req.userId });
 
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             if (!req.params.id || req.params.id === '') {
                 throw new Error('Param not found');
@@ -196,10 +196,10 @@ class BoardController implements Controller {
     }
     private async getThisBoard(req: Request, res: Response): Promise<any> {
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
             if (!req.params.id) {
                 throw new Error('Param not found');
             }
@@ -211,7 +211,7 @@ class BoardController implements Controller {
             if (!board) {
                 throw new Error('Board not found');
             }
-            if (!board.followers.includes(user._id)) {
+            if (!board.followers.includes(req.userId)) {
                 return res.status(555).json({
                     board,
                     message:
@@ -251,10 +251,10 @@ class BoardController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findById(req.userId);
+            /*const user = await userModel.findById(req.userId);
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             const boardBody = z.object({
                 boardId: z.string(),
@@ -281,8 +281,8 @@ class BoardController implements Controller {
                 throw new Error('Board not found');
             }
 
-            if (board.owner.toString() !== user._id.toString()) {
-                console.log(board.owner, user._id);
+            if (board.owner.toString() !== req.userId) {
+                console.log(board.owner, req.userId);
                 return res.status(401).json({ message: 'Not Allowed' });
             }
 

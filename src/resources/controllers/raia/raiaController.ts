@@ -28,10 +28,10 @@ class RaiaController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             const newRaiaBody = z.object({
                 title: string(),
@@ -47,7 +47,7 @@ class RaiaController implements Controller {
             const data = await raiaModel.create({
                 title: title,
                 board: board,
-                users: [user._id],
+                users: [req.userId],
             });
             await session.commitTransaction();
             return res.status(201).json({ data });
@@ -67,11 +67,11 @@ class RaiaController implements Controller {
     //REMOVER
     private async readRaia(req: Request, res: Response): Promise<any> {
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
-            const raias = await raiaModel.find({ users: { $in: user._id } });
+            }*/
+            const raias = await raiaModel.find({ users: { $in: req.userId } });
             return res.status(201).json({ raias });
         } catch (error: any) {
             if (error.message === 'User not found') {
@@ -167,10 +167,10 @@ class RaiaController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
             const requestBody = z.object({
                 fromRaiaId: string(),
                 toRaiaId: string(),
@@ -191,8 +191,8 @@ class RaiaController implements Controller {
             }
 
             if (
-                !raiaEnvia.users.includes(user._id) ||
-                !raiaRecebe.users.includes(user._id) ||
+                !raiaEnvia.users.includes(req.userId) ||
+                !raiaRecebe.users.includes(req.userId) ||
                 !raiaEnvia.cards.includes(cardId)
             ) {
                 throw new Error(
