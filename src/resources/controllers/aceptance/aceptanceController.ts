@@ -1,7 +1,7 @@
 import auth from '@/middleware/auth.middleware';
 import aceptanceModel from '@/resources/models/aceptanceModel';
 import boardModel from '@/resources/models/boardModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import { bauth } from '@/utils/bauth/bauth';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
@@ -32,10 +32,10 @@ class AceptanceController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
             if (!req.params.boardID || req.params.boardID === '') {
                 throw new Error('Param not found');
             }
@@ -46,7 +46,7 @@ class AceptanceController implements Controller {
                 throw new Error('Board not found');
             }
 
-            if (board.followers.includes(user._id)) {
+            if (board.followers.includes(req.userId)) {
                 return res
                     .status(400)
                     .json({ message: 'User already following this board' });
@@ -54,14 +54,14 @@ class AceptanceController implements Controller {
 
             const aceptance = await aceptanceModel.findOne({
                 boardId: board._id,
-                guestId: user._id,
+                guestId: req.userId,
                 ownerId: board.owner,
             });
 
             if (!aceptance) {
                 const data = await aceptanceModel.create({
                     boardId: board._id,
-                    guestId: user._id,
+                    guestId: req.userId,
                     ownerId: board.owner,
                 });
 
@@ -98,12 +98,13 @@ class AceptanceController implements Controller {
         res: Response
     ): Promise<any> {
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /* const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
             }
+            */
             const listOfAceptances = await aceptanceModel.find({
-                ownerId: user._id,
+                ownerId: req.userId,
             });
 
             const idBoardsToAcept: string[] = [];
@@ -144,10 +145,10 @@ class AceptanceController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             const aceptanceBody = z.object({
                 boardId: z.string(),
@@ -157,10 +158,10 @@ class AceptanceController implements Controller {
 
             const { boardId, guestId, answer } = aceptanceBody.parse(req.body);
 
-            const guest = await userModel.findById(guestId);
+            /*const guest = await userModel.findById(guestId);
             if (!guest) {
                 throw new Error('User not found');
-            }
+            }*/
             const board = await boardModel.findById(boardId);
             if (!board) {
                 throw new Error('Board not found');
@@ -174,7 +175,7 @@ class AceptanceController implements Controller {
             let message = 'Guest denied access as follower';
 
             if (answer) {
-                board.followers.push(guest._id);
+                board.followers.push(guestId);
                 board.save();
                 message = 'Guest acept as follower';
             }

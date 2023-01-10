@@ -1,7 +1,7 @@
 import auth from '@/middleware/auth.middleware';
 import boardModel from '@/resources/models/boardModel';
 import favoritesModel from '@/resources/models/favoritesModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
@@ -23,10 +23,10 @@ class favoritesController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findById(req.userId);
+            /*const user = await userModel.findById(req.userId);
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
             const favBody = z.object({
                 boardId: z.string(),
             });
@@ -37,21 +37,21 @@ class favoritesController implements Controller {
             if (!board) {
                 throw new Error('Board not found');
             }
-            if (!board.followers.includes(user._id)) {
+            if (!board.followers.includes(req.userId)) {
                 throw new Error(
                     'User is not allowed to fav this board, must be a follower first'
                 );
             }
 
             const favs = await favoritesModel.findOne({
-                userId: user._id,
+                userId: req.userId,
             });
 
             let message = '';
 
             if (!favs) {
                 await favoritesModel.create({
-                    userId: user._id,
+                    userId: req.userId,
                     favorites: [board._id],
                 });
                 message = 'First fav from this user recorded';

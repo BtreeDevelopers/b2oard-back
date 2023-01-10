@@ -2,7 +2,7 @@ import auth from '@/middleware/auth.middleware';
 import boardModel from '@/resources/models/boardModel';
 import cardModel from '@/resources/models/cardModel';
 import raiaModel from '@/resources/models/raiaModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
 import mongoose from 'mongoose';
@@ -26,10 +26,10 @@ class CardController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.find({ id: req.userId });
+            /*const user = await userModel.find({ id: req.userId });
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
             const cardBody = z.object({
                 title: z.string(),
                 subtitle: z.string().optional(),
@@ -101,11 +101,11 @@ class CardController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
 
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             if (!req.params.cardId) {
                 throw new Error('Param not found');
@@ -160,11 +160,11 @@ class CardController implements Controller {
                 throw new Error('Param not found');
             }
 
-            const user = await userModel.findOne({ _id: req.userId });
+            /*const user = await userModel.findOne({ _id: req.userId });
 
             if (!user) {
                 throw new Error('User not found');
-            }
+            }*/
 
             if (users) {
                 /*const boardppp = await boardModel.findOne({
@@ -209,8 +209,8 @@ class CardController implements Controller {
                 }
 
                 if (
-                    !raiaEnvia.users.includes(user._id) ||
-                    !raiaRecebe.users.includes(user._id) ||
+                    !raiaEnvia.users.includes(req.userId) ||
+                    !raiaRecebe.users.includes(req.userId) ||
                     !raiaEnvia.cards.includes(req.params.cardId)
                 ) {
                     throw new Error(

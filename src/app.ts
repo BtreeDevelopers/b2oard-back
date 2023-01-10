@@ -1,4 +1,4 @@
-import express, {Application} from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -6,12 +6,11 @@ import mongoose from 'mongoose';
 import Controller from './utils/interfaces/controllerInterface';
 
 class App {
-
     public express: Application;
     public port: Number;
     public controllers: Controller[];
 
-    constructor(controllers: Controller[],port:Number){
+    constructor(controllers: Controller[], port: Number) {
         this.express = express();
         this.port = port;
         this.controllers = controllers;
@@ -24,9 +23,9 @@ class App {
     }
 
     public listen(): void {
-        this.express.listen(this.port,()=>{
-            console.log(`Listening on port ${this.port}`)
-        })
+        this.express.listen(this.port, () => {
+            console.log(`Listening on port ${this.port}`);
+        });
     }
 
     private initialiseMiddleware(): void {
