@@ -2,7 +2,7 @@ import auth from '@/middleware/auth.middleware';
 import boardModel from '@/resources/models/boardModel';
 import cardModel from '@/resources/models/cardModel';
 import raiaModel from '@/resources/models/raiaModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
 import mongoose from 'mongoose';

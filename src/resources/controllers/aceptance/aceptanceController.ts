@@ -1,7 +1,7 @@
 import auth from '@/middleware/auth.middleware';
 import aceptanceModel from '@/resources/models/aceptanceModel';
 import boardModel from '@/resources/models/boardModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import { bauth } from '@/utils/bauth/bauth';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
@@ -158,10 +158,10 @@ class AceptanceController implements Controller {
 
             const { boardId, guestId, answer } = aceptanceBody.parse(req.body);
 
-            const guest = await userModel.findById(guestId);
+            /*const guest = await userModel.findById(guestId);
             if (!guest) {
                 throw new Error('User not found');
-            }
+            }*/
             const board = await boardModel.findById(boardId);
             if (!board) {
                 throw new Error('Board not found');
@@ -175,7 +175,7 @@ class AceptanceController implements Controller {
             let message = 'Guest denied access as follower';
 
             if (answer) {
-                board.followers.push(guest._id);
+                board.followers.push(guestId);
                 board.save();
                 message = 'Guest acept as follower';
             }

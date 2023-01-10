@@ -5,7 +5,7 @@ import z from 'zod';
 import cardModel from '@/resources/models/cardModel';
 import mongoose from 'mongoose';
 import auth from '@/middleware/auth.middleware';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import boardModel from '@/resources/models/boardModel';
 import raiaModel from '@/resources/models/raiaModel';
 import { bauth } from '@/utils/bauth/bauth';

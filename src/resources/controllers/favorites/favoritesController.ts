@@ -1,7 +1,7 @@
 import auth from '@/middleware/auth.middleware';
 import boardModel from '@/resources/models/boardModel';
 import favoritesModel from '@/resources/models/favoritesModel';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';

@@ -1,5 +1,5 @@
 import auth from '@/middleware/auth.middleware';
-import userModel from '@/resources/models/userModel';
+//import userModel from '@/resources/models/userModel';
 import Controller from '@/utils/interfaces/controllerInterface';
 import { Request, Response, Router } from 'express';
 import mongoose from 'mongoose';
