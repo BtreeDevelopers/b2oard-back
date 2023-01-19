@@ -25,7 +25,7 @@ class LoginController implements Controller {
     private async login(req: Request, res: Response): Promise<any> {
         try {
             const loginUser = z.object({
-                token: string().email(),
+                token: string(),
                 userId: string(),
             });
 
