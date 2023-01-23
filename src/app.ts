@@ -30,7 +30,7 @@ class App {
 
   private initialiseMiddleware(): void {
     this.express.get("/", (r, res) => {
-      res.send("taok 2");
+      res.send("taok 1");
     });
     this.express.use(helmet());
     this.express.use(cors());
